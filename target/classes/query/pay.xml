@@ -1,3 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="query.pay"></mapper>
+<mapper namespace="com.ktrn.mgateway.dao.PayDao">
+
+ <insert id="insertPayInfo" parameterType="PayVO">
+    		insert into ktrn_pay_info (
+    			trans_id, trans_reg_date, trans_status,
+				sv_code, op_code, ch_code, so_id, prod_cd, msisdn,
+				payment_type, credit_type, refid, payment_amount, req_sys_id
+    		) 
+    		values (
+				#{trans_id}, #{trans_reg_date}, #{trans_status},
+				#{sv_code}, #{op_code}, #{ch_code}, #{so_id}, #{prod_cd}, #{msisdn},
+				#{payment_type}, #{credit_type}, #{refid}, #{payment_amount}, #{req_sys_id}    		    		
+    		)
+    </insert>
+
+    <update id="updateApprovalInfo" parameterType="PayVO">
+    		update ktrn_pay_info set
+				trans_status = #{trans_status},
+				trans_fin_date = #{trans_fin_date},
+				tid = #{tid},
+				authkey = #{authkey},
+				pay_err_code = #{pay_err_code},
+				pay_err_msg = #{pay_err_msg},
+				bss_err_code = #{bss_err_code},
+				bss_err_msg = #{bss_err_msg}
+			where trans_id = #{trans_id} 
+    </update>
+
+    <select id="selectPayInfoByTrans_id" parameterType="String" resultType="PayVO">
+    		select 
+    			trans_reg_date, trans_status,
+				sv_code, op_code, ch_code, so_id, prod_cd, msisdn,
+				payment_type, credit_type, refid, payment_amount, req_sys_id,
+				trans_status, trans_fin_date, tid, authkey, 
+				pay_err_code, pay_err_msg, bss_err_code, bss_err_msg
+		    from ktrn_pay_info 
+		    where trans_id = #{trans_id} 
+    </select>
+    
+    <select id="selectPayInfoAllBy" parameterType="hashmap" resultType="PayVO">
+    		select  refid, ifnull(tid, "-") tid, trans_reg_date, trans_fin_date, 
+    		ifnull(trans_status, "-") trans_status, 
+    		ifnull(pay_err_code, "-") pay_err_code, 
+    		ifnull(pay_err_msg, "-") pay_err_msg, 
+    		ifnull(bss_err_code, "-") bss_err_code, 
+    		ifnull(bss_err_msg, "-") bss_err_msg, 
+    		ifnull(msisdn, "-") msisdn, 
+    		ifnull(payment_type, "-") payment_type, 
+    		ifnull(payment_amount, "-") payment_amount, 
+    		ifnull(authkey, "-") authkey
+    		 from ktrn_pay_info order by trans_reg_date asc
+    </select> 
+    
+      <select id="selectedPayInfo" parameterType="hashmap" resultType="PayVO">
+    		select refid, ifnull(tid, "-") tid, trans_reg_date, trans_fin_date, 
+    		ifnull(trans_status, "-") trans_status, 
+    		ifnull(pay_err_code, "-") pay_err_code, 
+    		ifnull(pay_err_msg, "-") pay_err_msg, 
+    		ifnull(bss_err_code, "-") bss_err_code, 
+    		ifnull(bss_err_msg, "-") bss_err_msg, 
+    		ifnull(msisdn, "-") msisdn, 
+    		ifnull(payment_type, "-") payment_type, 
+    		ifnull(payment_amount, "-") payment_amount, 
+    		ifnull(authkey, "-") authkey
+    		 from ktrn_pay_info 
+    		
+    		<if test="year != 0 and month == 0 and day == 0"> where trans_reg_date like concat(#{year},'%')</if>
+    		
+    		<if test="year !=0 and month != 0 and day == 0">
+    		 where date_format(trans_reg_date, "%Y%c") 
+    		like concat(#{year},#{month})
+    		</if>
+			
+    		<if test="year != 0 and month != 0 and day != 0">
+    		 where date_format(trans_reg_date, "%Y%c%e") 
+    		like concat(#{year},#{month},#{day})
+    		</if>
+    		order by trans_reg_date asc
+    </select>
+
+</mapper>
